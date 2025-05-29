@@ -1,0 +1,2 @@
+../Src/spi.c:11:6:spi1_init	4	static
+../Src/spi.c:33:9:spi1_transfer	24	static
