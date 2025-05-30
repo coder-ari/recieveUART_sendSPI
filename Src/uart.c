@@ -112,7 +112,9 @@ void USART1_IRQHandler(void) {
                 sum += shift_buf[i];
             }
 
-            if (sum == shift_buf[CAN_FRAME_SIZE - 1]) {
+            uint8_t checksum = (uint8_t)(sum & 0xFF);
+
+            if (checksum == shift_buf[CAN_FRAME_SIZE - 1]) {
                 if (fifo_free_space() >= CAN_FRAME_SIZE) {
                     fifo_push_frame(shift_buf);
                 } else {
