@@ -5,5 +5,5 @@
 ../Src/can.c:40:9:mcp2515_read_register	1
 ../Src/can.c:50:13:mcp2515_reset	1
 ../Src/can.c:57:6:can_init	1
-../Src/can.c:88:6:can_send_uint32	2
-../Src/can.c:116:6:can_receive	3
+../Src/can.c:88:6:can_send_bytes	4
+../Src/can.c:119:6:can_receive	3

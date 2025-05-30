@@ -43,7 +43,7 @@ void cs_high(void);
 void delay_ms(volatile uint32_t ms);
 uint8_t mcp2515_read_register(uint8_t reg);
 void mcp2515_write_register(uint8_t reg, uint8_t val);
-bool can_send_uint32(uint32_t value);
+bool can_send_bytes(uint8_t* data, uint8_t len);
 bool can_receive(uint8_t *id, uint8_t *data, uint8_t *len);
 
 #endif

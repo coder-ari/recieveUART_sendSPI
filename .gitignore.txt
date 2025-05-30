@@ -1,0 +1,101 @@
+/*
+ * main.c
+ * Created on: May 29, 2025
+ * Author: ARITRA
+ */
+
+#include "stm32f401.h"
+#include "uart.h"
+#include "can.h"
+#include "spi.h"
+
+#define START_BYTE      0x1B
+#define BLOCK_SIZE      15
+#define BUFFER_SIZE     150   // Circular FIFO buffer
+#define CAN_FRAME_SIZE  8
+
+uint8_t fifo_buffer[BUFFER_SIZE];
+volatile uint16_t fifo_head = 0;
+volatile uint16_t fifo_tail = 0;
+
+uint8_t collecting = 0;
+uint8_t rx_index = 0;
+uint8_t temp_block[BLOCK_SIZE];
+
+uint16_t fifo_available(void) {
+    return (fifo_head - fifo_tail + BUFFER_SIZE) % BUFFER_SIZE;
+}
+
+uint16_t fifo_free_space(void) {
+    return BUFFER_SIZE - fifo_available() - 1;  // Leave one byte empty
+}
+
+void fifo_push(uint8_t byte) {
+    fifo_buffer[fifo_head] = byte;
+    fifo_head = (fifo_head + 1) % BUFFER_SIZE;
+}
+
+uint8_t fifo_pop(void) {
+    uint8_t byte = fifo_buffer[fifo_tail];
+    fifo_tail = (fifo_tail + 1) % BUFFER_SIZE;
+    return byte;
+}
+
+void try_send_over_can(void) {
+    while (fifo_available() >= CAN_FRAME_SIZE) {
+        uint8_t frame[CAN_FRAME_SIZE];
+        for (uint8_t i = 0; i < CAN_FRAME_SIZE; i++) {
+            frame[i] = fifo_pop();
+        }
+
+        uint8_t retries = 100;
+        while (!can_send_bytes(frame, CAN_FRAME_SIZE) && retries--) {
+            // Optional: delay or retry
+        }
+
+        if (retries == 0) {
+            uart_send_async_string("CAN Send Timeout\r\n");
+            return;
+        }
+    }
+}
+
+int main(void) {
+    spi1_init();
+    uart_init();
+    can_init();
+
+    uart_send_async_string(" System Initialized \r\n");
+
+    char byte;
+
+    while (1) {
+        if (uart_read_byte(&byte)) {
+            if (!collecting) {
+                if ((uint8_t)byte == START_BYTE) {
+                	uart_send_async_string("Start byte received\r\n");
+                    collecting = 1;
+                    rx_index = 0;
+                }
+            } else {
+                temp_block[rx_index++] = byte;
+
+                if (rx_index == BLOCK_SIZE) {
+                    // Check space and store block
+                    if (fifo_free_space() >= BLOCK_SIZE) {
+                        for (uint8_t i = 0; i < BLOCK_SIZE; i++) {
+                            fifo_push(temp_block[i]);
+                        }
+                    } else {
+                        uart_send_async_string("FIFO Overflow\r\n");
+                    }
+
+                    collecting = 0;
+                    rx_index = 0;
+                }
+            }
+        }
+
+        try_send_over_can();  // Try sending if enough data
+    }
+}

@@ -18,5 +18,7 @@ void uart_send_hex(uint32_t value);
 uint8_t uart_read_byte(char *c);
 void uart_send_hex8(uint8_t value);
 #define USART1_IRQ_NUMBER 37
+void uart_try_send_from_fifo(void);
+
 
 #endif

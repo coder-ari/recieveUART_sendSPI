@@ -1,7 +1,9 @@
-../Src/uart.c:22:6:uart_init	1
-../Src/uart.c:46:6:uart_send_async	2
-../Src/uart.c:61:6:uart_send_hex	1
-../Src/uart.c:68:6:uart_send_hex8	1
-../Src/uart.c:74:9:uart_read_byte	2
-../Src/uart.c:82:6:uart_send_async_string	2
-../Src/uart.c:87:6:USART1_IRQHandler	5
+../Src/uart.c:28:17:fifo_available	1
+../Src/uart.c:32:17:fifo_free_space	1
+../Src/uart.c:36:13:fifo_push	1
+../Src/uart.c:41:16:fifo_pop	1
+../Src/uart.c:47:6:uart_init	1
+../Src/uart.c:63:6:uart_send_async	2
+../Src/uart.c:73:6:uart_send_async_string	2
+../Src/uart.c:77:6:uart_try_send_from_fifo	6
+../Src/uart.c:90:6:USART1_IRQHandler	9
